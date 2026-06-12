@@ -1,6 +1,5 @@
 'use client';
 import { useState, useEffect } from 'react';
-import Image from 'next/image';
 
 export default function Home() {
   const [url, setUrl] = useState('');
@@ -12,12 +11,10 @@ export default function Home() {
   const [isInstallable, setIsInstallable] = useState(false);
 
   useEffect(() => {
-    // Registrar o Service Worker
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.register('/sw.js').catch(console.error);
     }
 
-    // Ouvir o evento de instalação do PWA
     const handleBeforeInstallPrompt = (e) => {
       e.preventDefault();
       setDeferredPrompt(e);
@@ -25,7 +22,6 @@ export default function Home() {
     };
 
     window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
-
     return () => {
       window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
     };
@@ -82,65 +78,91 @@ export default function Home() {
   };
 
   return (
-    <div className="app-container">
-      <div className="header">
-        <h1>Cloud2MP3</h1>
-        <p>Baixe músicas do SoundCloud em 320kbps</p>
-      </div>
-
+    <>
       {isInstallable && (
-        <button 
-          onClick={handleInstallClick}
-          style={{ marginBottom: '20px', background: '#333', border: '1px solid #555' }}
-        >
-          📱 Instalar Aplicativo
-        </button>
-      )}
-
-      <div className="input-group">
-        <input 
-          type="text" 
-          placeholder="Cole o link do SoundCloud aqui..." 
-          value={url}
-          onChange={(e) => setUrl(e.target.value)}
-          onKeyDown={(e) => e.key === 'Enter' && fetchInfo()}
-        />
-        <button 
-          onClick={fetchInfo} 
-          disabled={loading || !url}
-        >
-          {loading ? (
-            <><div className="loader"></div> Carregando...</>
-          ) : (
-            'Buscar Música'
-          )}
-        </button>
-      </div>
-
-      {error && (
-        <div className="error-message">
-          ⚠️ {error}
+        <div className="install-btn-container">
+          <button className="install-btn" onClick={handleInstallClick}>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+              <polyline points="7 10 12 15 17 10"></polyline>
+              <line x1="12" y1="15" x2="12" y2="3"></line>
+            </svg>
+            Instalar App
+          </button>
         </div>
       )}
 
-      {trackInfo && (
-        <div className="track-info">
-          {trackInfo.thumbnail && (
-            <img src={trackInfo.thumbnail} alt="Capa" className="track-image" width={80} height={80} unoptimized />
-          )}
-          <div className="track-details">
-            <h3>{trackInfo.title}</h3>
-            <p>Por: {trackInfo.author}</p>
-            <button 
-              onClick={handleDownload} 
-              disabled={downloading}
-              style={{ marginTop: '15px', padding: '10px 20px', fontSize: '0.95rem' }}
-            >
-              {downloading ? 'Iniciando Download...' : 'Baixar MP3'}
-            </button>
+      <main className="main-layout">
+        
+        <div className="header-section">
+          <h1 className="title">Cloud2MP3</h1>
+          <p className="subtitle">Transforme suas músicas favoritas do SoundCloud em MP3 (320kbps) com apenas um clique.</p>
+
+          <div className="search-section">
+            <div className="input-wrapper">
+              <input 
+                type="text" 
+                className="input-field"
+                placeholder="Cole o link da música aqui..." 
+                value={url}
+                onChange={(e) => setUrl(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && fetchInfo()}
+              />
+              <button 
+                className="action-btn"
+                onClick={fetchInfo} 
+                disabled={loading || !url}
+              >
+                {loading ? (
+                  <><div className="loader-spinner"></div> Buscando</>
+                ) : (
+                  'Pesquisar'
+                )}
+              </button>
+            </div>
+            
+            {error && (
+              <div className="error-message">
+                ⚠️ {error}
+              </div>
+            )}
           </div>
         </div>
-      )}
-    </div>
+
+        {trackInfo && (
+          <div className="result-card">
+            {trackInfo.thumbnail && (
+              <div className="track-img-wrapper">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={trackInfo.thumbnail} alt="Capa" className="track-image" />
+              </div>
+            )}
+            <div className="track-content">
+              <span className="track-author">{trackInfo.author}</span>
+              <h3 className="track-title">{trackInfo.title}</h3>
+              
+              <button 
+                className="action-btn"
+                onClick={handleDownload} 
+                disabled={downloading}
+                style={{ width: 'fit-content' }}
+              >
+                {downloading ? (
+                  <><div className="loader-spinner"></div> Iniciando...</>
+                ) : (
+                  <>
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                    </svg>
+                    Baixar MP3
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        )}
+
+      </main>
+    </>
   );
 }
