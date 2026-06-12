@@ -7,6 +7,7 @@ export default function Home() {
   const [error, setError] = useState(null);
   const [trackInfo, setTrackInfo] = useState(null);
   const [downloading, setDownloading] = useState(false);
+  const [downloadingImage, setDownloadingImage] = useState(false);
   const [deferredPrompt, setDeferredPrompt] = useState(null);
   const [isInstallable, setIsInstallable] = useState(false);
 
@@ -35,6 +36,24 @@ export default function Home() {
       setIsInstallable(false);
     }
     setDeferredPrompt(null);
+  };
+
+  const handleDownloadImage = () => {
+    if (!trackInfo?.thumbnail) return;
+    setDownloadingImage(true);
+    
+    const downloadUrl = `/api/downloadImage?url=${encodeURIComponent(trackInfo.thumbnail)}`;
+    
+    const link = document.createElement('a');
+    link.href = downloadUrl;
+    link.setAttribute('download', '');
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    
+    setTimeout(() => {
+      setDownloadingImage(false);
+    }, 2000);
   };
 
   const fetchInfo = async () => {
@@ -141,6 +160,7 @@ export default function Home() {
               <span className="track-author">{trackInfo.author}</span>
               <h3 className="track-title">{trackInfo.title}</h3>
               
+            <div style={{ display: 'flex', gap: '15px', flexWrap: 'wrap' }}>
               <button 
                 className="action-btn"
                 onClick={handleDownload} 
@@ -158,6 +178,27 @@ export default function Home() {
                   </>
                 )}
               </button>
+              
+              <button 
+                className="action-btn"
+                onClick={handleDownloadImage} 
+                disabled={downloadingImage}
+                style={{ width: 'fit-content', background: 'transparent', border: '1px solid var(--panel-border)' }}
+              >
+                {downloadingImage ? (
+                  <><div className="loader-spinner"></div> Baixando...</>
+                ) : (
+                  <>
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                      <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                      <polyline points="21 15 16 10 5 21"></polyline>
+                    </svg>
+                    Baixar Capa
+                  </>
+                )}
+              </button>
+            </div>
             </div>
           </div>
         )}
