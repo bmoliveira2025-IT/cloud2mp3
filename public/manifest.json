@@ -1,0 +1,16 @@
+{
+  "name": "Cloud2MP3 Downloader",
+  "short_name": "Cloud2MP3",
+  "description": "Baixe músicas do SoundCloud em 320kbps",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0f0f13",
+  "theme_color": "#ff5500",
+  "icons": [
+    {
+      "src": "/icon.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

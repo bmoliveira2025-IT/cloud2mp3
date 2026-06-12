@@ -1,5 +1,5 @@
 'use client';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Image from 'next/image';
 
 export default function Home() {
@@ -8,6 +8,38 @@ export default function Home() {
   const [error, setError] = useState(null);
   const [trackInfo, setTrackInfo] = useState(null);
   const [downloading, setDownloading] = useState(false);
+  const [deferredPrompt, setDeferredPrompt] = useState(null);
+  const [isInstallable, setIsInstallable] = useState(false);
+
+  useEffect(() => {
+    // Registrar o Service Worker
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/sw.js').catch(console.error);
+    }
+
+    // Ouvir o evento de instalação do PWA
+    const handleBeforeInstallPrompt = (e) => {
+      e.preventDefault();
+      setDeferredPrompt(e);
+      setIsInstallable(true);
+    };
+
+    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+
+    return () => {
+      window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+    };
+  }, []);
+
+  const handleInstallClick = async () => {
+    if (!deferredPrompt) return;
+    deferredPrompt.prompt();
+    const { outcome } = await deferredPrompt.userChoice;
+    if (outcome === 'accepted') {
+      setIsInstallable(false);
+    }
+    setDeferredPrompt(null);
+  };
 
   const fetchInfo = async () => {
     if (!url) return;
@@ -55,6 +87,15 @@ export default function Home() {
         <h1>Cloud2MP3</h1>
         <p>Baixe músicas do SoundCloud em 320kbps</p>
       </div>
+
+      {isInstallable && (
+        <button 
+          onClick={handleInstallClick}
+          style={{ marginBottom: '20px', background: '#333', border: '1px solid #555' }}
+        >
+          📱 Instalar Aplicativo
+        </button>
+      )}
 
       <div className="input-group">
         <input 
