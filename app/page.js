@@ -199,6 +199,19 @@ export default function Home() {
                 )}
               </button>
             </div>
+            
+            <div style={{ marginTop: '30px', width: '100%', borderRadius: '12px', overflow: 'hidden', border: '1px solid var(--panel-border)' }}>
+              <iframe 
+                width="100%" 
+                height="120" 
+                scrolling="no" 
+                frameBorder="no" 
+                allow="autoplay" 
+                src={`https://w.soundcloud.com/player/?url=${encodeURIComponent(url)}&color=%23ff5500&auto_play=false&hide_related=true&show_comments=false&show_user=false&show_reposts=false&show_teaser=false&visual=false&show_artwork=false`}
+                style={{ display: 'block' }}
+              ></iframe>
+            </div>
+            
             </div>
           </div>
         )}
