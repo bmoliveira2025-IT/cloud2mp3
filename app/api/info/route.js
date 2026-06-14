@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import scdl from 'soundcloud-downloader';
+import { resolveSoundCloudUrl } from '../utils';
 
 export async function GET(request) {
   const { searchParams } = new URL(request.url);
@@ -10,16 +11,19 @@ export async function GET(request) {
   }
 
   try {
-    if (!scdl.isValidUrl(url)) {
+    const resolvedUrl = await resolveSoundCloudUrl(url);
+
+    if (!scdl.isValidUrl(resolvedUrl)) {
       return NextResponse.json({ error: 'Invalid SoundCloud URL' }, { status: 400 });
     }
     
-    const info = await scdl.getInfo(url);
+    const info = await scdl.getInfo(resolvedUrl);
     return NextResponse.json({
       title: info.title,
       duration: info.duration,
       thumbnail: info.artwork_url || (info.user && info.user.avatar_url),
-      author: info.user && info.user.username
+      author: info.user && info.user.username,
+      resolvedUrl: resolvedUrl
     });
   } catch (error) {
     console.error('Error fetching info:', error);

@@ -70,6 +70,10 @@ export default function Home() {
         throw new Error(data.error || 'Failed to fetch info');
       }
       
+      if (data.resolvedUrl && data.resolvedUrl !== url) {
+        setUrl(data.resolvedUrl);
+      }
+      
       setTrackInfo(data);
     } catch (err) {
       setError(err.message);

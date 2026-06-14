@@ -1,6 +1,7 @@
 import scdl from 'soundcloud-downloader';
 import ffmpeg from 'fluent-ffmpeg';
 import ffmpegPath from '@ffmpeg-installer/ffmpeg';
+import { resolveSoundCloudUrl } from '../utils';
 
 // Configura o path do ffmpeg
 ffmpeg.setFfmpegPath(ffmpegPath.path);
@@ -14,14 +15,16 @@ export async function GET(request) {
   }
 
   try {
-    if (!scdl.isValidUrl(url)) {
+    const resolvedUrl = await resolveSoundCloudUrl(url);
+
+    if (!scdl.isValidUrl(resolvedUrl)) {
       return new Response(JSON.stringify({ error: 'Invalid SoundCloud URL' }), { status: 400 });
     }
 
-    const info = await scdl.getInfo(url);
+    const info = await scdl.getInfo(resolvedUrl);
     const title = info.title ? info.title.replace(/[^\w\s-]/gi, '') : 'track';
 
-    const stream = await scdl.download(url);
+    const stream = await scdl.download(resolvedUrl);
 
     // No Next.js App Router API, podemos retornar um ReadableStream.
     // Usaremos o PassThrough do Node para intermediar o stream do ffmpeg e o NextResponse.
