@@ -18,7 +18,12 @@ export async function GET(request) {
   try {
     if (platform === 'youtube') {
       const youtubedl = getYtdl();
-      const info = await youtubedl(url, { dumpSingleJson: true, noWarnings: true });
+      const info = await youtubedl(url, { 
+        dumpSingleJson: true, 
+        noWarnings: true,
+        noCacheDir: true,
+        preferFreeFormats: true
+      });
       return NextResponse.json({
         title: info.title,
         duration: info.duration ? info.duration * 1000 : 0,
@@ -47,7 +52,11 @@ export async function GET(request) {
     });
   } catch (error) {
     console.error('Error fetching info:', error);
-    return NextResponse.json({ error: 'Failed to fetch track info' }, { status: 500 });
+    const errorMessage = error?.message || String(error);
+    return NextResponse.json({ 
+      error: 'Failed to fetch track info',
+      details: errorMessage
+    }, { status: 500 });
   }
 }
 

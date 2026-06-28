@@ -67,7 +67,8 @@ export default function Home() {
       const data = await response.json();
       
       if (!response.ok) {
-        throw new Error(data.error || 'Failed to fetch info');
+        const errorMsg = data.details ? `${data.error} (${data.details})` : (data.error || 'Failed to fetch info');
+        throw new Error(errorMsg);
       }
       
       if (data.resolvedUrl && data.resolvedUrl !== url) {

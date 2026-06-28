@@ -26,10 +26,20 @@ export async function GET(request) {
 
     if (platform === 'youtube') {
       const youtubedl = getYtdl();
-      const info = await youtubedl(url, { dumpSingleJson: true, noWarnings: true });
+      const info = await youtubedl(url, { 
+        dumpSingleJson: true, 
+        noWarnings: true,
+        noCacheDir: true,
+        preferFreeFormats: true
+      });
       title = info.title ? info.title.replace(/[^\w\s-]/gi, '') : 'track';
 
-      const subprocess = youtubedl.exec(url, { output: '-', format: 'bestaudio', ffmpegLocation: ffmpegPath.path });
+      const subprocess = youtubedl.exec(url, { 
+        output: '-', 
+        format: 'bestaudio', 
+        ffmpegLocation: ffmpegPath.path,
+        noCacheDir: true
+      });
 
       ffmpeg(subprocess.stdout)
         .audioBitrate('320k')
@@ -77,6 +87,9 @@ export async function GET(request) {
 
   } catch (error) {
     console.error('Error downloading:', error);
-    return new Response('Failed to download track', { status: 500 });
+    return new Response(JSON.stringify({ 
+      error: 'Failed to download track', 
+      details: error?.message || String(error) 
+    }), { status: 500, headers: { 'Content-Type': 'application/json' } });
   }
 }

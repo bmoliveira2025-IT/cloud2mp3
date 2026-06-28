@@ -1,4 +1,5 @@
 import path from 'path';
+import fs from 'fs';
 import ytdlRaw from 'youtube-dl-exec';
 
 export async function resolveSoundCloudUrl(url) {
@@ -30,6 +31,9 @@ export function detectPlatform(url) {
 
 export function getYtdl() {
   const binaryPath = path.join(process.cwd(), 'node_modules/youtube-dl-exec/bin', process.platform === 'win32' ? 'yt-dlp.exe' : 'yt-dlp');
-  return ytdlRaw.create(binaryPath);
+  if (fs.existsSync(binaryPath)) {
+    return ytdlRaw.create(binaryPath);
+  }
+  return ytdlRaw;
 }
 
