@@ -30,7 +30,8 @@ export async function GET(request) {
         dumpSingleJson: true, 
         noWarnings: true,
         noCacheDir: true,
-        preferFreeFormats: true
+        preferFreeFormats: true,
+        jsRuntimes: 'node'
       });
       title = info.title ? info.title.replace(/[^\w\s-]/gi, '') : 'track';
 
@@ -38,7 +39,8 @@ export async function GET(request) {
         output: '-', 
         format: 'bestaudio', 
         ffmpegLocation: ffmpegPath.path,
-        noCacheDir: true
+        noCacheDir: true,
+        jsRuntimes: 'node'
       });
 
       ffmpeg(subprocess.stdout)

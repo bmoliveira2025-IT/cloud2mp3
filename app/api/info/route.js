@@ -22,7 +22,8 @@ export async function GET(request) {
         dumpSingleJson: true, 
         noWarnings: true,
         noCacheDir: true,
-        preferFreeFormats: true
+        preferFreeFormats: true,
+        jsRuntimes: 'node'
       });
       return NextResponse.json({
         title: info.title,
