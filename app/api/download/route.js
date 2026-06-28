@@ -84,9 +84,13 @@ export async function GET(request) {
 
   } catch (error) {
     console.error('Error downloading:', error);
+    let errorMessage = error?.message || String(error);
+    if (errorMessage.includes('Sign in to confirm you’re not a bot') || errorMessage.includes('bot')) {
+      errorMessage = 'Bloqueio anti-bot do YouTube detectado nos servidores do Vercel. É necessário configurar a variável YOUTUBE_COOKIES no painel do Vercel e fazer um Redeploy. Detalhes: ' + errorMessage;
+    }
     return new Response(JSON.stringify({ 
       error: 'Failed to download track', 
-      details: error?.message || String(error) 
+      details: errorMessage 
     }), { status: 500, headers: { 'Content-Type': 'application/json' } });
   }
 }
