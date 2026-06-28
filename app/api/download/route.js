@@ -1,7 +1,7 @@
 import scdl from 'soundcloud-downloader';
 import ffmpeg from 'fluent-ffmpeg';
 import ffmpegPath from '@ffmpeg-installer/ffmpeg';
-import { resolveSoundCloudUrl, detectPlatform, getYtdl } from '../utils';
+import { resolveSoundCloudUrl, detectPlatform, getYtdl, getYoutubeOptions } from '../utils';
 
 // Configura o path do ffmpeg
 ffmpeg.setFfmpegPath(ffmpegPath.path);
@@ -26,22 +26,17 @@ export async function GET(request) {
 
     if (platform === 'youtube') {
       const youtubedl = getYtdl();
-      const info = await youtubedl(url, { 
+      const info = await youtubedl(url, getYoutubeOptions({ 
         dumpSingleJson: true, 
-        noWarnings: true,
-        noCacheDir: true,
-        preferFreeFormats: true,
-        jsRuntimes: 'node'
-      });
+        preferFreeFormats: true 
+      }));
       title = info.title ? info.title.replace(/[^\w\s-]/gi, '') : 'track';
 
-      const subprocess = youtubedl.exec(url, { 
+      const subprocess = youtubedl.exec(url, getYoutubeOptions({ 
         output: '-', 
-        format: 'bestaudio', 
-        ffmpegLocation: ffmpegPath.path,
-        noCacheDir: true,
-        jsRuntimes: 'node'
-      });
+        format: 'bestaudio/best', 
+        ffmpegLocation: ffmpegPath.path 
+      }));
 
       ffmpeg(subprocess.stdout)
         .audioBitrate('320k')

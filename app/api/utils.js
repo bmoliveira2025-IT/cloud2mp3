@@ -37,3 +37,27 @@ export function getYtdl() {
   return ytdlRaw;
 }
 
+export function getYoutubeOptions(extraOptions = {}) {
+  const options = {
+    noWarnings: true,
+    noCacheDir: true,
+    jsRuntimes: 'node',
+    extractorArgs: 'youtube:player_client=android,ios,web',
+    ...extraOptions
+  };
+
+  if (process.env.YOUTUBE_COOKIES) {
+    const cookiesPath = path.join('/tmp', 'youtube_cookies.txt');
+    if (!fs.existsSync(cookiesPath)) {
+      try {
+        fs.writeFileSync(cookiesPath, process.env.YOUTUBE_COOKIES);
+      } catch (err) {
+        console.error('Failed to write cookies file:', err);
+      }
+    }
+    options.cookies = cookiesPath;
+  }
+
+  return options;
+}
+

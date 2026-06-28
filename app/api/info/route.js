@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import scdl from 'soundcloud-downloader';
-import { resolveSoundCloudUrl, detectPlatform, getYtdl } from '../utils';
+import { resolveSoundCloudUrl, detectPlatform, getYtdl, getYoutubeOptions } from '../utils';
 
 export async function GET(request) {
   const { searchParams } = new URL(request.url);
@@ -18,13 +18,10 @@ export async function GET(request) {
   try {
     if (platform === 'youtube') {
       const youtubedl = getYtdl();
-      const info = await youtubedl(url, { 
+      const info = await youtubedl(url, getYoutubeOptions({ 
         dumpSingleJson: true, 
-        noWarnings: true,
-        noCacheDir: true,
-        preferFreeFormats: true,
-        jsRuntimes: 'node'
-      });
+        preferFreeFormats: true 
+      }));
       return NextResponse.json({
         title: info.title,
         duration: info.duration ? info.duration * 1000 : 0,
