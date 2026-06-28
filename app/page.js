@@ -119,14 +119,14 @@ export default function Home() {
         
         <div className="header-section">
           <h1 className="title">Cloud2MP3</h1>
-          <p className="subtitle">Transforme suas músicas favoritas do SoundCloud em MP3 (320kbps) com apenas um clique.</p>
+          <p className="subtitle">Transforme suas músicas favoritas do SoundCloud ou YouTube Music em MP3 (320kbps) com apenas um clique.</p>
 
           <div className="search-section">
             <div className="input-wrapper">
               <input 
                 type="text" 
                 className="input-field"
-                placeholder="Cole o link da música aqui..." 
+                placeholder="Cole o link do SoundCloud ou YouTube Music aqui..." 
                 value={url}
                 onChange={(e) => setUrl(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && fetchInfo()}
@@ -205,15 +205,28 @@ export default function Home() {
             </div>
             
             <div style={{ marginTop: '30px', width: '100%', borderRadius: '12px', overflow: 'hidden', border: '1px solid var(--panel-border)' }}>
-              <iframe 
-                width="100%" 
-                height="120" 
-                scrolling="no" 
-                frameBorder="no" 
-                allow="autoplay" 
-                src={`https://w.soundcloud.com/player/?url=${encodeURIComponent(url)}&color=%23ff5500&auto_play=false&hide_related=true&show_comments=false&show_user=false&show_reposts=false&show_teaser=false&visual=false&show_artwork=false`}
-                style={{ display: 'block' }}
-              ></iframe>
+              {trackInfo.platform === 'youtube' ? (
+                <iframe 
+                  width="100%" 
+                  height="150" 
+                  src={`https://www.youtube.com/embed/${trackInfo.videoId}`}
+                  title="YouTube video player" 
+                  frameBorder="0" 
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+                  allowFullScreen
+                  style={{ display: 'block' }}
+                ></iframe>
+              ) : (
+                <iframe 
+                  width="100%" 
+                  height="120" 
+                  scrolling="no" 
+                  frameBorder="no" 
+                  allow="autoplay" 
+                  src={`https://w.soundcloud.com/player/?url=${encodeURIComponent(url)}&color=%23ff5500&auto_play=false&hide_related=true&show_comments=false&show_user=false&show_reposts=false&show_teaser=false&visual=false&show_artwork=false`}
+                  style={{ display: 'block' }}
+                ></iframe>
+              )}
             </div>
             
             </div>

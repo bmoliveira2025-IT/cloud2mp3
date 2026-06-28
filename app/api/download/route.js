@@ -1,7 +1,7 @@
 import scdl from 'soundcloud-downloader';
 import ffmpeg from 'fluent-ffmpeg';
 import ffmpegPath from '@ffmpeg-installer/ffmpeg';
-import { resolveSoundCloudUrl } from '../utils';
+import { resolveSoundCloudUrl, detectPlatform, getYtdl } from '../utils';
 
 // Configura o path do ffmpeg
 ffmpeg.setFfmpegPath(ffmpegPath.path);
@@ -14,30 +14,50 @@ export async function GET(request) {
     return new Response(JSON.stringify({ error: 'URL is required' }), { status: 400 });
   }
 
+  const platform = detectPlatform(url);
+  if (!platform) {
+    return new Response(JSON.stringify({ error: 'URL inválida' }), { status: 400 });
+  }
+
   try {
-    const resolvedUrl = await resolveSoundCloudUrl(url);
-
-    if (!scdl.isValidUrl(resolvedUrl)) {
-      return new Response(JSON.stringify({ error: 'Invalid SoundCloud URL' }), { status: 400 });
-    }
-
-    const info = await scdl.getInfo(resolvedUrl);
-    const title = info.title ? info.title.replace(/[^\w\s-]/gi, '') : 'track';
-
-    const stream = await scdl.download(resolvedUrl);
-
-    // No Next.js App Router API, podemos retornar um ReadableStream.
-    // Usaremos o PassThrough do Node para intermediar o stream do ffmpeg e o NextResponse.
     const { PassThrough } = require('stream');
     const passThroughStream = new PassThrough();
+    let title = 'track';
 
-    ffmpeg(stream)
-      .audioBitrate('320k')
-      .format('mp3')
-      .on('error', (err) => {
-        console.error('FFmpeg error:', err);
-      })
-      .pipe(passThroughStream);
+    if (platform === 'youtube') {
+      const youtubedl = getYtdl();
+      const info = await youtubedl(url, { dumpSingleJson: true, noWarnings: true });
+      title = info.title ? info.title.replace(/[^\w\s-]/gi, '') : 'track';
+
+      const subprocess = youtubedl.exec(url, { output: '-', format: 'bestaudio', ffmpegLocation: ffmpegPath.path });
+
+      ffmpeg(subprocess.stdout)
+        .audioBitrate('320k')
+        .format('mp3')
+        .on('error', (err) => {
+          console.error('FFmpeg error:', err);
+        })
+        .pipe(passThroughStream);
+    } else {
+      const resolvedUrl = await resolveSoundCloudUrl(url);
+
+      if (!scdl.isValidUrl(resolvedUrl)) {
+        return new Response(JSON.stringify({ error: 'Invalid SoundCloud URL' }), { status: 400 });
+      }
+
+      const info = await scdl.getInfo(resolvedUrl);
+      title = info.title ? info.title.replace(/[^\w\s-]/gi, '') : 'track';
+
+      const stream = await scdl.download(resolvedUrl);
+
+      ffmpeg(stream)
+        .audioBitrate('320k')
+        .format('mp3')
+        .on('error', (err) => {
+          console.error('FFmpeg error:', err);
+        })
+        .pipe(passThroughStream);
+    }
 
     // Converte o Node.js Stream para Web Stream
     const webStream = new ReadableStream({
